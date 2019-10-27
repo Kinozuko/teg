@@ -108,6 +108,29 @@ Path generate_path(Graph g, vertex_t u, vertex_t v){
 	return(c);
 }
 
+Routing generate_routing(Graph g){
+	/*
+		Generate random path between
+		each pair of vertices (u,v)
+		where u!=v
+
+		routing size -> d*(d-1)
+	*/
+	Routing r;
+	Path c;
+	r.d = g.d * (g.d-1);
+
+	for(vertex_t u=0; u<g.d; u++){
+		for(vertex_t v=0; v<g.d; v++){
+			if(u!=v){
+				c = generate_path(g,u,v);
+				r.insert(c);
+			}
+		}
+	}
+	return(r);
+}
+
 std :: vector<Routing> initial_population(Graph g, int mu){
 	std :: vector<Routing> population(mu);
 	/*
@@ -208,6 +231,23 @@ int main(){
 	}
 
 	std :: cout << std :: endl;
+
+	r = generate_routing(g);
+
+	std :: vector<Path> :: iterator itr_r;
+	int i=0;
+
+	for(itr_r=r.routing.begin();itr_r!=r.routing.end();itr_r++){
+		Path c = (*itr_r);
+		std :: cout << "Path " << i+1 << " -> ";
+		i++;
+		for(itr_c=c.path.begin();itr_c!=c.path.end();itr_c++){
+			std :: cout << (*itr_c) << " ";
+		}
+		std :: cout << std :: endl;
+	}
+
+
 	//r = genetic_algorithm(g,beta,mu,alpha);
 
 	/*
