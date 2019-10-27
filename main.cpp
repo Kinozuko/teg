@@ -83,6 +83,14 @@ struct Routing{
 	}
 };
 
+struct Population{
+	std :: vector<Routing> population;
+
+	void insert(Routing r){
+		population.push_back(r);
+	}
+};
+
 Path generate_path(Graph g, vertex_t u, vertex_t v){
 	/*
 		Generate a random path
@@ -131,24 +139,28 @@ Routing generate_routing(Graph g){
 	return(r);
 }
 
-std :: vector<Routing> initial_population(Graph g, int mu){
-	std :: vector<Routing> population(mu);
-	/*
-		TODO: Generate population
-	*/
-	return(population);
-}
+Population initial_population(Graph g, int mu){
+	Population p;
+	Routing r;
+
+	for(int i=0;i<mu;i++){
+		r = generate_routing(g);
+		p.insert(r);
+	}
+
+	return(p);
+};
 
 
 Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	Routing r; // DELETE THIS
 
-	std :: vector<Routing> population(mu);
-	std :: vector<Routing> new_population(mu);
-	std :: vector<Routing> parents(2);
+	Population p;
+	Population new_p;
+	Population parents;
 	int generation = 0;
 
-	population = initial_population(g, mu);
+	p = initial_population(g, mu);
 	while(generation<beta){
 		generation++;
 		/*
@@ -202,7 +214,7 @@ int main(){
 	adj.insert(2);
 
 	g.graph[3] = adj;
-
+    // Print Graph 
 	for(itr_vertex=g.graph.begin();itr_vertex!=g.graph.end();itr_vertex++){
 		std :: cout << itr_vertex->first << " --> ";
 		for(itr_adj=itr_vertex->second.begin();itr_adj!=itr_vertex->second.end();itr_adj++){
@@ -211,6 +223,32 @@ int main(){
 		std :: cout << std :: endl;
 	}
 
+	Population p = initial_population(g,5);
+
+	std :: vector<Routing> :: iterator itr_p;
+	std :: vector<Path> :: iterator itr_r;
+	std :: vector<int> :: iterator itr_c;
+	int j = 0;
+
+	for(itr_p=p.population.begin();itr_p!=p.population.end();itr_p++){
+		std :: cout << "Population #" << j+1 << std :: endl;
+		Routing r = (*itr_p);
+		j++;
+		int i=0;
+		for(itr_r=r.routing.begin();itr_r!=r.routing.end();itr_r++){
+			Path c = (*itr_r);
+			std :: cout << "\tPath " << i+1 << " -> ";
+			i++;
+			for(itr_c=c.path.begin();itr_c!=c.path.end();itr_c++){
+				std :: cout << (*itr_c) << " ";
+			}
+			std :: cout << std :: endl;
+		}
+	}
+
+	
+
+	/*	Generate path and routing
 	adj = g.get_adj(0);
 
 	for(itr_adj=adj.begin();itr_adj!=adj.end();itr_adj++){
@@ -246,7 +284,7 @@ int main(){
 		}
 		std :: cout << std :: endl;
 	}
-
+	*/
 
 	//r = genetic_algorithm(g,beta,mu,alpha);
 
