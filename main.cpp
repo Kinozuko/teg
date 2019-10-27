@@ -9,8 +9,36 @@
 
 using vertex_t = int;
 
+struct Edge{
+	std :: pair<vertex_t,vertex_t> edge; // Pair of vertices
+
+	void create(vertex_t u, vertex_t v){
+		edge = std  :: make_pair(u,v);
+	}
+
+	bool operator==(const Edge& e) const{
+		if(edge.first == e.edge.first && edge.second == e.edge.second &&
+			edge.first == e.edge.second && edge.second == e.edge.first){
+			return(true);
+		}
+		return(false);
+	}
+};
+
+struct Lambda{
+	// Struct to store congestion of all edges in a routing
+	// \phi(\Gamma.e) = # number of path in each edge
+	std :: vector<int> lambda;
+
+	void insert(int congestion){
+		lambda.push_back(congestion);
+	}
+	// TODO: Build Lambda vector = \phi(\Gamme,e)
+};
+
 struct Graph{
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> graph;
+	std :: vector<Edge> edges; // All unique edge
 	int d; // Number of vertices
 
 	int number_vertices(){
@@ -44,11 +72,38 @@ struct Graph{
 		return(vertex);
 	}
 
-};
+	bool is_vextex_in_edges(vertex_t u, vertex_t v){
+		Edge e;
+		e.create(u,v);
+		if(std :: find(edges.begin(),edges.end(),e) != edges.end()){
+			return(true);
+		}
+		return(false);
+	}
 
-struct Edge{
-	std :: map<vertex_t,vertex_t> edges; // Pair of vertices
-	std :: vector<int> edge_index; // Represent the number of paths through an edge
+	Lambda get_congestion(){
+		Edge e;
+		Lambda congestion;
+		std :: unordered_set<vertex_t> :: iterator itr_adj;
+		std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex;
+
+		for(itr_vertex=graph.begin();itr_vertex!=graph.end();itr_vertex++){
+			//std :: cout << itr_vertex->first << " --> ";
+			for(itr_adj=itr_vertex->second.begin();itr_adj!=itr_vertex->second.end();itr_adj++){
+				if(is_vextex_in_edges(itr_vertex->first, (*itr_adj))){ // Check if exisis and edge u,v==v,u
+					break;
+				}
+				else{
+					break;
+				}
+				//std :: cout << (*itr_adj) << " ";
+			}
+			//std :: cout << std :: endl;
+		}
+
+		return(congestion);
+	}
+
 };
 
 struct Path{
@@ -151,6 +206,11 @@ Population initial_population(Graph g, int mu){
 	return(p);
 };
 
+Population psi(Population p){
+	Population parents;
+	// TODO: Complete selection process to get parents
+	return(parents);
+}
 
 Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	Routing r; // DELETE THIS
@@ -162,6 +222,7 @@ Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 
 	p = initial_population(g, mu);
 	while(generation<beta){
+		parents = psi(p); // Parent Selection Function
 		generation++;
 		/*
 			TODO : Complete genetic algoritmhm
@@ -223,7 +284,14 @@ int main(){
 		std :: cout << std :: endl;
 	}
 
-	Population p = initial_population(g,5);
+	//Population p = initial_population(g,5);
+
+	Lambda congestion;
+
+	congestion = g.get_congestion();
+
+
+	/* Print initial population
 
 	std :: vector<Routing> :: iterator itr_p;
 	std :: vector<Path> :: iterator itr_r;
@@ -245,6 +313,8 @@ int main(){
 			std :: cout << std :: endl;
 		}
 	}
+
+	*/
 
 	
 
