@@ -176,14 +176,27 @@ Routing generate_routing(Graph g){
 		Generate random path between
 		each pair of vertices (u,v)
 		where u!=v
-
-		routing size -> d*(d-1)
 	*/
 	Routing r;
 	Path c;
-	r.d = g.d * (g.d-1);
+	
+	vertex_t u=0;
+	r.d = g.d * g.d; // Total of all pair of vertices in a graph with g.d = |V|
 
+	for(vertex_t v=0; v<r.d; v++){
+		std :: cout << "AHHH" << std :: endl;
+		std :: cout << u << " " << v << std :: endl;
+		if(u!=v%g.d){
+			c = generate_path(g,u,v%g.d);
+			r.insert(c);
+			if((v+1)%g.d==0) u++;
+		}
+	}
+		/*
+	std :: cout << "AHHH" << std :: endl;
+	
 	for(vertex_t u=0; u<g.d; u++){
+		std :: cout << "AHHH" << std :: endl;
 		for(vertex_t v=0; v<g.d; v++){
 			if(u!=v){
 				c = generate_path(g,u,v);
@@ -191,6 +204,7 @@ Routing generate_routing(Graph g){
 			}
 		}
 	}
+	*/
 	return(r);
 }
 
@@ -284,7 +298,7 @@ int main(){
 		std :: cout << std :: endl;
 	}
 
-	//Population p = initial_population(g,5);
+	Population p = initial_population(g,5);
 
 	Lambda congestion;
 
