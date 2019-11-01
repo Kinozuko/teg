@@ -72,6 +72,20 @@ struct Graph{
 		return(vertex);
 	}
 
+	friend std :: ostream& operator<<(std :: ostream& os, const Graph& g){
+		std :: unordered_set<vertex_t> :: const_iterator itr_adj; // Iterator of adjacent list
+		std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: const_iterator itr_vertex; // Iterator of vertex
+		
+		for(itr_vertex=g.graph.begin();itr_vertex!=g.graph.end();itr_vertex++){
+			os << itr_vertex->first << " --> ";
+			for(itr_adj=itr_vertex->second.begin();itr_adj!=itr_vertex->second.end();itr_adj++){
+				os << (*itr_adj) << " ";
+			}
+			os << std :: endl;
+		}
+		return(os);
+	}
+
 	bool is_vextex_in_edges(vertex_t u, vertex_t v){
 		Edge e;
 		e.create(u,v);
@@ -247,6 +261,7 @@ Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 }
 
 
+
 int main(){
 	Graph g;
 	Routing r;
@@ -257,46 +272,36 @@ int main(){
 
 	g.d = d;
 
-	std :: unordered_set<vertex_t> adj;
-	std :: unordered_set<vertex_t> :: iterator itr_adj;
-	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex;
+	std :: unordered_set<vertex_t> adj; // Adjacent list
+	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
+	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
 
-	adj.insert(1); 
-	adj.insert(2); 
-	adj.insert(3);
-
+	adj.insert(1); adj.insert(2); adj.insert(3);
 	g.graph[0] = adj;
-
 	adj.clear();
-	adj.insert(0); 
-	adj.insert(2); 
-	adj.insert(3);
 
+	adj.insert(0); adj.insert(2); adj.insert(3);
 	g.graph[1] = adj;
-
 	adj.clear();
 
-	adj.insert(0); 
-	adj.insert(1); 
-	adj.insert(3);
-
+	adj.insert(0); adj.insert(1); adj.insert(3);
 	g.graph[2] = adj;
-
 	adj.clear();
 
-	adj.insert(0);
-	adj.insert(1);
-	adj.insert(2);
-
+	adj.insert(0); adj.insert(1); adj.insert(2);
 	g.graph[3] = adj;
+
     // Print Graph 
+    /*
 	for(itr_vertex=g.graph.begin();itr_vertex!=g.graph.end();itr_vertex++){
 		std :: cout << itr_vertex->first << " --> ";
 		for(itr_adj=itr_vertex->second.begin();itr_adj!=itr_vertex->second.end();itr_adj++){
 			std :: cout << (*itr_adj) << " ";
 		}
 		std :: cout << std :: endl;
-	}
+	}*/
+
+	std :: cout << g << std :: endl;
 
 	Population p = initial_population(g,5);
 
