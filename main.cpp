@@ -6,73 +6,52 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <set>
+#include <array>
+#include <chrono>
+#include <random>
 
 using vertex_t = int;
 
-struct Edge{
-	std :: pair<vertex_t,vertex_t> edge; // Pair of vertices
-
-	void create(vertex_t u, vertex_t v){
-		edge = std  :: make_pair(u,v);
-	}
-
-	bool operator==(const Edge& e) const{
-		if(edge.first == e.edge.first && edge.second == e.edge.second &&
-			edge.first == e.edge.second && edge.second == e.edge.first){
-			return(true);
-		}
-		return(false);
-	}
-};
-
-struct Lambda{
-	// Struct to store congestion of all edges in a routing
-	// \phi(\Gamma.e) = # number of path in each edge
-	std :: vector<int> lambda;
-
-	void insert(int congestion){
-		lambda.push_back(congestion);
-	}
-	// TODO: Build Lambda vector = \phi(\Gamme,e)
-};
-
 struct Graph{
+	/*
+		Graph Datastruct
+		
+		Dic of list adj, based on hash
+		{
+			'u' : [vi_...vk] 
+		}
+	*/
+
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> graph;
-	std :: vector<Edge> edges; // All unique edge
-	int d; // Number of vertices
+	int d; // d = |V|
 
 	int number_vertices(){
 		return(d);
 	}
 
 	std :: unordered_set<vertex_t> get_adj(vertex_t u){
-		// Get adj list from vertex u
-		std :: unordered_map<vertex_t,std :: unordered_set<vertex_t>> :: const_iterator got = graph.find(u);
-
-		return (got->second);
+		// Get adj list of vertex u
+		return(graph.find(u)->second);
 	}
 
-	bool is_in_adj(vertex_t u, std :: unordered_set<vertex_t> adj){
-		if( std :: find(adj.begin(),adj.end(),u) != adj.end()){
-			return(true);
+	void print_adj(std :: unordered_set<vertex_t> adj){
+		for(auto iterator: adj){
+			std :: cout << iterator << " ";
 		}
-		else{
-			return(false);
-		}
+		std :: cout << std :: endl;
 	}
 
-	vertex_t random_vertice(vertex_t u, vertex_t v, int d){
-		// u and b are vertices and d = |V|
-		int vertex;
-		std :: srand(std :: time(NULL));
-		do{
-			vertex = std :: rand() % d;
-		}while(vertex==u);
+	vertex_t random_vertice(){
+		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  		std::default_random_engine generator (seed);
+  		std :: uniform_int_distribution<vertex_t> distribution(0,d-1);
 
-		return(vertex);
+  		return(distribution(generator));
 	}
 
 	friend std :: ostream& operator<<(std :: ostream& os, const Graph& g){
+		// Overload for operator << to print graph
 		std :: unordered_set<vertex_t> :: const_iterator itr_adj; // Iterator of adjacent list
 		std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: const_iterator itr_vertex; // Iterator of vertex
 		
@@ -85,140 +64,122 @@ struct Graph{
 		}
 		return(os);
 	}
-
-	bool is_vextex_in_edges(vertex_t u, vertex_t v){
-		Edge e;
-		e.create(u,v);
-		if(std :: find(edges.begin(),edges.end(),e) != edges.end()){
-			return(true);
-		}
-		return(false);
-	}
-
-	Lambda get_congestion(){
-		Edge e;
-		Lambda congestion;
-		std :: unordered_set<vertex_t> :: iterator itr_adj;
-		std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex;
-
-		for(itr_vertex=graph.begin();itr_vertex!=graph.end();itr_vertex++){
-			//std :: cout << itr_vertex->first << " --> ";
-			for(itr_adj=itr_vertex->second.begin();itr_adj!=itr_vertex->second.end();itr_adj++){
-				if(is_vextex_in_edges(itr_vertex->first, (*itr_adj))){ // Check if exisis and edge u,v==v,u
-					break;
-				}
-				else{
-					break;
-				}
-				//std :: cout << (*itr_adj) << " ";
-			}
-			//std :: cout << std :: endl;
-		}
-
-		return(congestion);
-	}
-
 };
 
 struct Path{
-	std :: vector<vertex_t> path;
+	std :: vector<vertex_t> path; // Set of vertex to reach from u to v
+	int path_size=0; // Number of vertices in path
+
+	void initialize(int n){
+		path.reserve(n); // Reserve memory for len path, max path is |V|
+	}
 
 	void insert(vertex_t u){
 		path.push_back(u);
+		path_size++;
 	}
 
-	bool is_in(vertex_t u){
-		if( std :: find(path.begin(),path.end(),u) != path.end()){
-			return(true);
-		}
-		else{
-			return(false);
-		}
+	bool find(vertex_t u){
+		if(std :: find(path.begin(),
+			path.end(),u) != path.end()) return(true);
+		return(false);
 	}
 
+	int size() const{
+		return(path_size);
+	}
+
+	friend std :: ostream& operator<<(std :: ostream& os,const Path& c){
+		for(auto iterator: c.path){
+			os << iterator << " ";
+		}
+		return(os);
+	}
 };
 
 struct Routing{
-	int d; // Size of vector number_vertices x number_vertices
+	int size;
 	std :: vector<Path> routing;
 
-	void initialize(){
-		std :: vector<Path> r(d);
-		routing = r;
+	void initialize(int n){
+		routing.reserve(n);
+		size = n;
 	}
 
 	void insert(Path c){
 		routing.push_back(c);
 	}
+
+	friend std :: ostream& operator<<(std :: ostream& os, const Routing& r){
+		int i=0;
+		for(auto iterator: r.routing){
+			os << "\tPath #" << i+1 << " --> " << iterator << std :: endl;
+			i++;
+		}
+		return(os);
+	}
 };
 
 struct Population{
 	std :: vector<Routing> population;
+	int mu; // Number of population
+
+	void initialize(int n){
+		population.reserve(n);
+		mu = n;
+	}
 
 	void insert(Routing r){
 		population.push_back(r);
 	}
+
+	friend std :: ostream& operator<<(std :: ostream& os, const Population& p){
+		int i=0;
+		os << "Population" << std :: endl;
+		for(auto iterator: p.population){
+			os << "Routing #" << i+1 << std :: endl << iterator << std :: endl;
+			i++;
+		}
+		return(os);
+	}
 };
 
 Path generate_path(Graph g, vertex_t u, vertex_t v){
-	/*
-		Generate a random path
-		from vertex u to vertex v
-	*/
-	int d;
+	// Generate a random path between vertex u,v
+
 	Path c;
 	vertex_t vertex;
 	std :: unordered_set<vertex_t> adj;
+	
+	c.initialize(g.d);
+	c.insert(u);
+	vertex = g.random_vertice();
 
-	d = g.number_vertices();
-	vertex = g.random_vertice(u,v,d);
-	c.insert(u); // Insert vertex u as begin of the path
 	while(vertex!=v){
-		adj = g.get_adj(u);
-		if(g.is_in_adj(vertex, adj) && !c.is_in(vertex)){
-			c.insert(vertex);
-			u = vertex;
+		if(!c.find(vertex)){
+			adj = g.get_adj(vertex);
+			if(adj.find(v)!=adj.end()) c.insert(vertex);
 		}
-		vertex = g.random_vertice(vertex,u,d);
+		vertex = g.random_vertice();
 	}
 	c.insert(vertex);
 	return(c);
 }
 
 Routing generate_routing(Graph g){
-	/*
-		Generate random path between
-		each pair of vertices (u,v)
-		where u!=v
-	*/
 	Routing r;
 	Path c;
-	
-	vertex_t u=0;
-	r.d = g.d * g.d; // Total of all pair of vertices in a graph with g.d = |V|
 
-	for(vertex_t v=0; v<r.d; v++){
-		std :: cout << "AHHH" << std :: endl;
-		std :: cout << u << " " << v << std :: endl;
+	vertex_t u=0;
+	r.initialize(g.d*g.d);
+
+	for(vertex_t v=0; v<r.size; v++){
 		if(u!=v%g.d){
 			c = generate_path(g,u,v%g.d);
 			r.insert(c);
 			if((v+1)%g.d==0) u++;
 		}
 	}
-		/*
-	std :: cout << "AHHH" << std :: endl;
-	
-	for(vertex_t u=0; u<g.d; u++){
-		std :: cout << "AHHH" << std :: endl;
-		for(vertex_t v=0; v<g.d; v++){
-			if(u!=v){
-				c = generate_path(g,u,v);
-				r.insert(c);
-			}
-		}
-	}
-	*/
 	return(r);
 }
 
@@ -226,52 +187,17 @@ Population initial_population(Graph g, int mu){
 	Population p;
 	Routing r;
 
-	for(int i=0;i<mu;i++){
+	p.initialize(mu);
+
+	for(int i=0; i<mu; i++){
 		r = generate_routing(g);
 		p.insert(r);
 	}
 
 	return(p);
-};
-
-Population psi(Population p){
-	Population parents;
-	// TODO: Complete selection process to get parents
-	return(parents);
 }
 
-Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
-	Routing r; // DELETE THIS
-
-	Population p;
-	Population new_p;
-	Population parents;
-	int generation = 0;
-
-	p = initial_population(g, mu);
-	while(generation<beta){
-		parents = psi(p); // Parent Selection Function
-		generation++;
-		/*
-			TODO : Complete genetic algoritmhm
-		*/
-	}
-
-	return(r);
-}
-
-
-
-int main(){
-	Graph g;
-	Routing r;
-	int beta=50; // Number of generations
-	int mu=30; // Number of population
-	float alpha=0.1; // Probability of mutation
-	int d = 4; // |V|
-
-	g.d = d;
-
+void store_graph(Graph &g){
 	std :: unordered_set<vertex_t> adj; // Adjacent list
 	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
@@ -290,123 +216,32 @@ int main(){
 
 	adj.insert(0); adj.insert(1); adj.insert(2);
 	g.graph[3] = adj;
+}
 
-    // Print Graph 
-    /*
-	for(itr_vertex=g.graph.begin();itr_vertex!=g.graph.end();itr_vertex++){
-		std :: cout << itr_vertex->first << " --> ";
-		for(itr_adj=itr_vertex->second.begin();itr_adj!=itr_vertex->second.end();itr_adj++){
-			std :: cout << (*itr_adj) << " ";
-		}
-		std :: cout << std :: endl;
-	}*/
+int main(){
+	Graph g; // Graph
+	int beta=50; // Number of generations
+	int mu=30; // Number of population
+	float alpha=0.1; // Probability of mutation
+	int d=4; // |V|
+
+	g.d = d;
+
+	store_graph(g); // Create a graph
 
 	std :: cout << g << std :: endl;
 
-	Population p = initial_population(g,5);
+	Population p;
 
-	Lambda congestion;
+	p = initial_population(g,80);
 
-	congestion = g.get_congestion();
-
-
-	/* Print initial population
-
-	std :: vector<Routing> :: iterator itr_p;
-	std :: vector<Path> :: iterator itr_r;
-	std :: vector<int> :: iterator itr_c;
-	int j = 0;
-
-	for(itr_p=p.population.begin();itr_p!=p.population.end();itr_p++){
-		std :: cout << "Population #" << j+1 << std :: endl;
-		Routing r = (*itr_p);
-		j++;
-		int i=0;
-		for(itr_r=r.routing.begin();itr_r!=r.routing.end();itr_r++){
-			Path c = (*itr_r);
-			std :: cout << "\tPath " << i+1 << " -> ";
-			i++;
-			for(itr_c=c.path.begin();itr_c!=c.path.end();itr_c++){
-				std :: cout << (*itr_c) << " ";
-			}
-			std :: cout << std :: endl;
-		}
-	}
-
-	*/
-
-	
-
-	/*	Generate path and routing
-	adj = g.get_adj(0);
-
-	for(itr_adj=adj.begin();itr_adj!=adj.end();itr_adj++){
-		std :: cout << "0 -> " << (*itr_adj) << " ";
-	}	
-
-	std :: cout << std :: endl;
-
-	Path c;
-	c = generate_path(g, 2, 0);
-
-	std :: cout << "Path to reach 2-0" << std :: endl;
-
-	std :: vector<vertex_t> :: iterator itr_c;
-
-	for(itr_c=c.path.begin();itr_c!=c.path.end();itr_c++){
-		std :: cout << (*itr_c) << " ";
-	}
-
-	std :: cout << std :: endl;
+	std :: cout << p;
+	/*
+	Routing r;
 
 	r = generate_routing(g);
 
-	std :: vector<Path> :: iterator itr_r;
-	int i=0;
-
-	for(itr_r=r.routing.begin();itr_r!=r.routing.end();itr_r++){
-		Path c = (*itr_r);
-		std :: cout << "Path " << i+1 << " -> ";
-		i++;
-		for(itr_c=c.path.begin();itr_c!=c.path.end();itr_c++){
-			std :: cout << (*itr_c) << " ";
-		}
-		std :: cout << std :: endl;
-	}
+	std :: cout << r << std :: endl;
 	*/
-
-	//r = genetic_algorithm(g,beta,mu,alpha);
-
-	/*
-	Routing routing;
-	routing.d = d;
-	routing.initialize();
-
-	for(int i=0;i<d;i++){
-		for(int j=0;j<d;j++){
-			cout << routing.routing[i][j] << " ";
-		}
-		cout << endl;
-	}*/
-
-	/*
-	std :: unordered_map<int, std :: unordered_set<int>> G;
-	std :: unordered_map<int, std::unordered_set<int>> :: iterator itr;
-
-	std :: unordered_set<int> adj;
-	std :: unordered_set<int> :: iterator itr_adj;
-	for(int i=0;i<5;i++){
-		adj.insert(i);
-	}
-	G[0] = adj;
-
-	for(itr = G.begin();itr!=G.end();itr++){
-		std :: cout << itr->first << std :: endl;
-		for(itr_adj = itr->second.begin(); itr_adj != itr->second.end(); itr_adj++){
-			std :: cout << (*itr_adj) << " ";
-		}
-		std :: cout << std :: endl;
-	}
-	*/
-	return(42);	
+	return(42);
 }
