@@ -10,29 +10,10 @@
 #include <array>
 #include <chrono>
 #include <random>
+#include <numeric>
+#include <cmath>
 
 using vertex_t = int;
-
-void store_graph(Graph &g){
-	std :: unordered_set<vertex_t> adj; // Adjacent list
-	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
-	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
-
-	adj.insert(1); adj.insert(2); adj.insert(3);
-	g.graph[0] = adj;
-	adj.clear();
-
-	adj.insert(0); adj.insert(2); adj.insert(3);
-	g.graph[1] = adj;
-	adj.clear();
-
-	adj.insert(0); adj.insert(1); adj.insert(3);
-	g.graph[2] = adj;
-	adj.clear();
-
-	adj.insert(0); adj.insert(1); adj.insert(2);
-	g.graph[3] = adj;
-}
 
 struct Graph{
 	/*
@@ -165,6 +146,27 @@ struct Population{
 	}
 };
 
+void store_graph(Graph &g){
+	std :: unordered_set<vertex_t> adj; // Adjacent list
+	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
+	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
+
+	adj.insert(1); adj.insert(2); adj.insert(3);
+	g.graph[0] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(2); adj.insert(3);
+	g.graph[1] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(1); adj.insert(3);
+	g.graph[2] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(1); adj.insert(2);
+	g.graph[3] = adj;
+}
+
 Path generate_path(Graph g, vertex_t u, vertex_t v){
 	// Generate a random path between vertex u,v
 
@@ -220,30 +222,48 @@ Population xi(Graph g, int mu){
 	return(p);
 }
 
+double omega(Routing r){
+	// Cost function
+	// Calculate norm of R = ||R||
+	// ||R|| = for all c_i in R sqrt(sum_i^n |c_i|)
+	double cost=0.0;
+
+	for(auto iterator: r.routing){
+		cost += std :: pow(iterator.size(),2);
+		//std :: cout << iterator.size() << std :: endl;
+	}
+	//std :: cout << sqrt(cost) << std :: endl;
+	return(sqrt(cost));
+}
+
 Population psi(Population p){
 	// Select the best parents based on his value
 	Population parents;
 
 	parents.initialize(2);
 
+	for(auto iterator: p.population){
+		std :: cout << omega(iterator) << std :: endl;
+	}
 	return(parents);
 }
 
 Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
-	Population p;
-	Population new_p;
-	Population parents;
+	Population p, new_p, parents;
+	Routing r;
 
 	p = xi(g,mu);
 	for(int generation=0; generation<mu; generation++){
-
+		parents = psi(p);
 	}
+	
+	return(r);
 }
 
 int main(){
 	Graph g; // Graph
 	int beta=50; // Number of generations
-	int mu=30; // Number of population
+	int mu=50; // Number of population
 	float alpha=0.1; // Probability of mutation
 	int d=4; // |V|
 
@@ -253,17 +273,21 @@ int main(){
 
 	std :: cout << g << std :: endl;
 
+	genetic_algorithm(g,beta, mu, alpha);
+	/*
 	Population p;
 
-	p = initial_population(g,80);
+	p = xi(g,80);
 
-	std :: cout << p;
+	std :: cout << p;*/
 	/*
 	Routing r;
 
 	r = generate_routing(g);
 
 	std :: cout << r << std :: endl;
+
+	omega(r);
 	*/
 	return(42);
 }
