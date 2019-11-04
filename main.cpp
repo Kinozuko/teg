@@ -13,6 +13,27 @@
 
 using vertex_t = int;
 
+void store_graph(Graph &g){
+	std :: unordered_set<vertex_t> adj; // Adjacent list
+	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
+	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
+
+	adj.insert(1); adj.insert(2); adj.insert(3);
+	g.graph[0] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(2); adj.insert(3);
+	g.graph[1] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(1); adj.insert(3);
+	g.graph[2] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(1); adj.insert(2);
+	g.graph[3] = adj;
+}
+
 struct Graph{
 	/*
 		Graph Datastruct
@@ -167,6 +188,7 @@ Path generate_path(Graph g, vertex_t u, vertex_t v){
 }
 
 Routing generate_routing(Graph g){
+	// Generate routing with n*(n-1) paths
 	Routing r;
 	Path c;
 
@@ -183,7 +205,8 @@ Routing generate_routing(Graph g){
 	return(r);
 }
 
-Population initial_population(Graph g, int mu){
+Population xi(Graph g, int mu){
+	// Generate initial population of routing with mu individuals
 	Population p;
 	Routing r;
 
@@ -197,25 +220,24 @@ Population initial_population(Graph g, int mu){
 	return(p);
 }
 
-void store_graph(Graph &g){
-	std :: unordered_set<vertex_t> adj; // Adjacent list
-	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
-	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
+Population psi(Population p){
+	// Select the best parents based on his value
+	Population parents;
 
-	adj.insert(1); adj.insert(2); adj.insert(3);
-	g.graph[0] = adj;
-	adj.clear();
+	parents.initialize(2);
 
-	adj.insert(0); adj.insert(2); adj.insert(3);
-	g.graph[1] = adj;
-	adj.clear();
+	return(parents);
+}
 
-	adj.insert(0); adj.insert(1); adj.insert(3);
-	g.graph[2] = adj;
-	adj.clear();
+Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
+	Population p;
+	Population new_p;
+	Population parents;
 
-	adj.insert(0); adj.insert(1); adj.insert(2);
-	g.graph[3] = adj;
+	p = xi(g,mu);
+	for(int generation=0; generation<mu; generation++){
+
+	}
 }
 
 int main(){
