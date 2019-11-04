@@ -304,7 +304,8 @@ Population phi(Population parents, int mu){
 	return(new_p);
 }
 
-Population upsilon(Popuplation new_p, float alpha){
+Population upsilon(Population new_p, float alpha){
+
 	return(new_p);
 }
 
@@ -316,7 +317,7 @@ Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	for(int generation=0; generation<mu; generation++){
 		parents = psi(p); // Select parents
 		new_p = phi(parents, mu-2); // Generate new population with parents
-		new_p = upsilon(new_p, alpha) // Apply mutation to new population if prob < alpha
+		new_p = upsilon(new_p, alpha); // Apply mutation to new population if prob < alpha
 	}
 	
 	return(r);
