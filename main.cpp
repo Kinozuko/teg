@@ -239,12 +239,29 @@ double omega(Routing r){
 Population psi(Population p){
 	// Select the best parents based on his value
 	Population parents;
-
+	Routing r1=p.population[0], r2=p.population[1];
+	double r1_value=omega(r1), r2_value=omega(r2);
+	double aux;
 	parents.initialize(2);
 
-	for(auto iterator: p.population){
-		std :: cout << omega(iterator) << std :: endl;
+	for(int i=2; i<p.mu; i++){
+		aux = omega(p.population[i]);
+		if(aux < r1_value){
+			r1 = p.population[i];
+			r1_value = aux;
+		}
+		else{
+			if(aux < r2_value){
+				r2 = p.population[i];
+				r2_value = aux;
+			}
+		}
+		
+		//std :: cout << omega(iterator) << std :: endl;
 	}
+	parents.insert(r1); parents.insert(r2);
+	//std :: cout << r1 << " --> " << r1_value << std :: endl;
+	//std :: cout << r2 << " --> " << r2_value << std :: endl;
 	return(parents);
 }
 
