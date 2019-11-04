@@ -146,6 +146,14 @@ struct Population{
 	}
 };
 
+float random_probability(){
+	std::random_device rd;
+	std::mt19937 engine(rd());
+	std::uniform_real_distribution<float>generator(0, 1);
+
+	return(generator(engine)); 
+}
+
 void store_graph(Graph &g){
 	std :: unordered_set<vertex_t> adj; // Adjacent list
 	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
@@ -265,13 +273,50 @@ Population psi(Population p){
 	return(parents);
 }
 
+Routing cross(Population parents){
+	// Crossing parents to obtain a child
+	// Each path has a 0.5 chance to be selected
+	Routing r;
+
+	r.initialize(parents.population[0].routing.size());
+
+	for(int i=0;i<r.size;i++){
+		if(random_probability()<0.5){
+			r.insert(parents.population[0].routing[i]);
+		}
+		else{
+			r.insert(parents.population[1].routing[i]);
+		}
+	}
+	return(r);
+}
+
+Population phi(Population parents, int mu){
+	// Generate a new population mu of childs
+	Population new_p;
+
+	new_p.initialize(mu);
+
+	for(int i=0;i<mu;i++){
+		new_p.insert(cross(parents));
+	}
+
+	return(new_p);
+}
+
+Population upsilon(Popuplation new_p, float alpha){
+	return(new_p);
+}
+
 Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	Population p, new_p, parents;
 	Routing r;
 
-	p = xi(g,mu);
+	p = xi(g,mu); // Generate initial population
 	for(int generation=0; generation<mu; generation++){
-		parents = psi(p);
+		parents = psi(p); // Select parents
+		new_p = phi(parents, mu-2); // Generate new population with parents
+		new_p = upsilon(new_p, alpha) // Apply mutation to new population if prob < alpha
 	}
 	
 	return(r);
@@ -291,6 +336,8 @@ int main(){
 	std :: cout << g << std :: endl;
 
 	genetic_algorithm(g,beta, mu, alpha);
+
+	//std :: cout << random_probability() << std :: endl;
 	/*
 	Population p;
 
