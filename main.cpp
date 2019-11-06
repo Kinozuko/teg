@@ -104,8 +104,8 @@ struct Routing{
 	std :: vector<Path> routing;
 
 	void initialize(int n){
-		routing.reserve(n);
-		size = n;
+		routing.reserve(n*(n-1));
+		size = n*(n-1);
 	}
 
 	void insert(Path c){
@@ -203,9 +203,9 @@ Routing generate_routing(Graph g){
 	Path c;
 
 	vertex_t u=0;
-	r.initialize(g.d*g.d);
+	r.initialize(g.d);
 
-	for(vertex_t v=0; v<r.size; v++){
+	for(vertex_t v=0; v<g.d*g.d; v++){
 		if(u!=v%g.d){
 			c = generate_path(g,u,v%g.d);
 			r.insert(c);
@@ -226,7 +226,6 @@ Population xi(Graph g, int mu){
 		r = generate_routing(g);
 		p.insert(r);
 	}
-
 	return(p);
 }
 
@@ -273,13 +272,12 @@ Population psi(Population p){
 	return(parents);
 }
 
-Routing cross(Population parents){
+Routing cross(Population parents, Graph g){
 	// Crossing parents to obtain a child
 	// Each path has a 0.5 chance to be selected
 	Routing r;
 
-	r.initialize(parents.population[0].routing.size());
-
+	r.initialize(g.d);
 	for(int i=0;i<r.size;i++){
 		if(random_probability()<0.5){
 			r.insert(parents.population[0].routing[i]);
@@ -287,47 +285,95 @@ Routing cross(Population parents){
 		else{
 			r.insert(parents.population[1].routing[i]);
 		}
+		//std :: cout << r << std :: endl;
 	}
 	return(r);
 }
 
-Population phi(Population parents, int mu){
+Population phi(Population parents, Graph g, int mu){
 	// Generate a new population mu of childs
 	Population new_p;
 
 	new_p.initialize(mu);
 
 	for(int i=0;i<mu;i++){
-		new_p.insert(cross(parents));
+		new_p.insert(cross(parents,g));
 	}
 
 	return(new_p);
 }
 
-Population upsilon(Population new_p, float alpha){
-
+Population upsilon(Population new_p, Graph g, float alpha){
+	//std :: cout << new_p.mu << std :: endl;
+	for(int i=0;i<new_p.mu;i++){
+		for(int j=0;j<new_p.population[i].routing.size();j++){
+			if(random_probability() <= alpha){
+				new_p.population[i].routing[j] = generate_path(g,
+					new_p.population[i].routing[j].path.front(),
+					new_p.population[i].routing[j].path.back());
+			}	
+		}
+	}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 	return(new_p);
+}
+
+Population theta(Population new_p, Population parents){
+	// Set new population combining new_population and parents
+	Population p;
+	p.initialize(new_p.mu+parents.mu);
+
+	p.population = new_p.population;
+	p.insert(p.population[0]); p.insert(p.population[1]);
+	return(p);
+}
+
+Routing eta(Population p){
+	// Select the best routing : omega(r) is minimum
+	Routing r1=p.population[0];
+	double r1_value=omega(r1);
+	double aux;
+
+	for(int i=1; i<p.mu; i++){
+		aux = omega(p.population[i]);
+		if(aux < r1_value){
+			r1 = p.population[i];
+			r1_value = aux;
+		}
+	}
+	return(r1);
 }
 
 Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	Population p, new_p, parents;
 	Routing r;
 
+	p.initialize(mu);
+	parents.initialize(2);
+	new_p.initialize(mu-2);
+	r.initialize(g.d);
+
 	p = xi(g,mu); // Generate initial population
+	std :: cout << p << std :: endl;
 	for(int generation=0; generation<mu; generation++){
+		//std :: cout << "Psi function" << std :: endl;
 		parents = psi(p); // Select parents
-		new_p = phi(parents, mu-2); // Generate new population with parents
-		new_p = upsilon(new_p, alpha); // Apply mutation to new population if prob < alpha
+		//std :: cout << "Phi function" << std :: endl;
+		new_p = phi(parents, g, mu-2); // Generate new population with parents
+		//std :: cout << "Upsilon function" << std :: endl;
+		new_p = upsilon(new_p, g, alpha); // Apply mutation to new population if prob < alpha
+		//std :: cout << "theta function" << std :: endl;
+		p = theta(new_p, parents); // Combine new population with parents to obtain current population
+		//std :: cout << p << std :: endl;
 	}
-	
-	return(r);
+	return(eta(p)); // Return the best routing : omega(r) is minimum
 }
 
 int main(){
 	Graph g; // Graph
+	Routing r; // Best routing
 	int beta=50; // Number of generations
 	int mu=50; // Number of population
-	float alpha=0.1; // Probability of mutation
+	float alpha=0.02; // Probability of mutation
 	int d=4; // |V|
 
 	g.d = d;
@@ -336,7 +382,9 @@ int main(){
 
 	std :: cout << g << std :: endl;
 
-	genetic_algorithm(g,beta, mu, alpha);
+	r = genetic_algorithm(g,beta, mu, alpha);
+
+	std :: cout << "Best routing after " << beta << " generatios: " << std :: endl <<  r << std :: endl;
 
 	//std :: cout << random_probability() << std :: endl;
 	/*
