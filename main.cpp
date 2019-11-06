@@ -385,22 +385,6 @@ int main(){
 	r = genetic_algorithm(g,beta, mu, alpha);
 
 	std :: cout << "Best routing after " << beta << " generatios: " << std :: endl <<  r << std :: endl;
-
-	//std :: cout << random_probability() << std :: endl;
-	/*
-	Population p;
-
-	p = xi(g,80);
-
-	std :: cout << p;*/
-	/*
-	Routing r;
-
-	r = generate_routing(g);
-
-	std :: cout << r << std :: endl;
-
-	omega(r);
-	*/
+	
 	return(42);
 }
