@@ -355,15 +355,10 @@ Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	p = xi(g,mu); // Generate initial population
 	std :: cout << p << std :: endl;
 	for(int generation=0; generation<beta; generation++){
-		//std :: cout << "Psi function" << std :: endl;
 		parents = psi(p); // Select parents
-		//std :: cout << "Phi function" << std :: endl;
 		new_p = phi(parents, g, mu-2); // Generate new population with parents
-		//std :: cout << "Upsilon function" << std :: endl;
 		new_p = upsilon(new_p, g, alpha); // Apply mutation to new population if prob < alpha
-		//std :: cout << "theta function" << std :: endl;
 		p = theta(new_p, parents); // Combine new population with parents to obtain current population
-		//std :: cout << p << std :: endl;
 	}
 	return(eta(p)); // Return the best routing : omega(r) is minimum
 }
