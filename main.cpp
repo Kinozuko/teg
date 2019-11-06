@@ -354,7 +354,7 @@ Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 
 	p = xi(g,mu); // Generate initial population
 	std :: cout << p << std :: endl;
-	for(int generation=0; generation<mu; generation++){
+	for(int generation=0; generation<beta; generation++){
 		//std :: cout << "Psi function" << std :: endl;
 		parents = psi(p); // Select parents
 		//std :: cout << "Phi function" << std :: endl;
@@ -371,7 +371,7 @@ Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 int main(){
 	Graph g; // Graph
 	Routing r; // Best routing
-	int beta=50; // Number of generations
+	int beta=30; // Number of generations
 	int mu=50; // Number of population
 	float alpha=0.02; // Probability of mutation
 	int d=4; // |V|
