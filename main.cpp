@@ -181,7 +181,7 @@ void store_graph(Graph &g){
 	g.graph[5] = adj;
 
 	adj.insert(0);  adj.insert(2);
-	adj.insert(5); adj.insert(6);
+	adj.insert(5); adj.insert(3);
 
 	g.graph[6] = adj;
 }
