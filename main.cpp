@@ -159,25 +159,37 @@ void store_graph(Graph &g){
 	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
 
-	adj.insert(1); adj.insert(2); adj.insert(3);
+	adj.insert(1); adj.insert(6); adj.insert(4);
 	g.graph[0] = adj;
 	adj.clear();
 
-	adj.insert(0); adj.insert(2); adj.insert(3);
+	adj.insert(0); adj.insert(2); adj.insert(6);
 	g.graph[1] = adj;
 	adj.clear();
 
-	adj.insert(0); adj.insert(1); adj.insert(3);
+	adj.insert(1); adj.insert(6); 
 	g.graph[2] = adj;
 	adj.clear();
 
-	adj.insert(0); adj.insert(1); adj.insert(2);
+	adj.insert(4); adj.insert(6);
 	g.graph[3] = adj;
+
+	adj.insert(6);
+	g.graph[4] = adj;
+
+	adj.insert(4); adj.insert(0); adj.insert(6);
+	g.graph[5] = adj;
+
+	adj.insert(0);  adj.insert(2);
+	adj.insert(5); adj.insert(6);
+
+	g.graph[6] = adj;
 }
 
 Path generate_path(Graph g, vertex_t u, vertex_t v){
 	// Generate a random path between vertex u,v
 
+ 	// TODO: Fix details about don't findind and edge
 	Path c;
 	vertex_t vertex;
 	std :: unordered_set<vertex_t> adj;
@@ -369,7 +381,7 @@ int main(){
 	int beta=30; // Number of generations
 	int mu=50; // Number of population
 	float alpha=0.02; // Probability of mutation
-	int d=4; // |V|
+	int d=7; // |V|
 
 	g.d = d;
 
