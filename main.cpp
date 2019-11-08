@@ -12,6 +12,7 @@
 #include <random>
 #include <numeric>
 #include <cmath>
+#include <iterator>
 
 using vertex_t = int;
 
@@ -45,6 +46,7 @@ struct Graph{
 	}
 
 	vertex_t random_vertice(){
+		// Generate a random vertice fromt adj set
 		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   		std::default_random_engine generator (seed);
   		std :: uniform_int_distribution<vertex_t> distribution(0,d-1);
@@ -159,31 +161,33 @@ void store_graph(Graph &g){
 	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
 
-	adj.insert(1); adj.insert(6); adj.insert(4);
+	adj.insert(1); adj.insert(6);
 	g.graph[0] = adj;
 	adj.clear();
 
-	adj.insert(0); adj.insert(2); adj.insert(6);
+	adj.insert(0); adj.insert(2); adj.insert(4);
 	g.graph[1] = adj;
 	adj.clear();
 
-	adj.insert(1); adj.insert(6); 
+	adj.insert(1); adj.insert(5); 
 	g.graph[2] = adj;
 	adj.clear();
 
-	adj.insert(4); adj.insert(6);
+	adj.insert(4); adj.insert(1); adj.insert(2);
 	g.graph[3] = adj;
+	adj.clear();
 
-	adj.insert(6);
+	adj.insert(0); adj.insert(1); adj.insert(3);
 	g.graph[4] = adj;
+	adj.clear();
 
-	adj.insert(4); adj.insert(0); adj.insert(6);
+	adj.insert(2); adj.insert(0);
 	g.graph[5] = adj;
+	adj.clear();
 
-	adj.insert(0);  adj.insert(2);
-	adj.insert(5); adj.insert(3);
-
+	adj.insert(0);
 	g.graph[6] = adj;
+	adj.clear();
 }
 
 Path generate_path(Graph g, vertex_t u, vertex_t v){
