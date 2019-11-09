@@ -12,6 +12,7 @@
 #include <random>
 #include <numeric>
 #include <cmath>
+#include <queue>
 
 using vertex_t = int;
 
@@ -47,7 +48,7 @@ struct Graph{
 	vertex_t random_vertice(){
 		// Generate a random vertice fromt adj set
 		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  		std::default_random_engine generator (seed);
+  		std :: default_random_engine generator(seed);
   		std :: uniform_int_distribution<vertex_t> distribution(0,d-1);
 
   		return(distribution(generator));
@@ -159,16 +160,37 @@ void store_graph(Graph &g){
 	std :: unordered_set<vertex_t> adj; // Adjacent list
 	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
-
-	adj.insert(1); adj.insert(6);
+	/*
+	adj.insert(1); adj.insert(3); adj.insert(2);
 	g.graph[0] = adj;
 	adj.clear();
 
-	adj.insert(0); adj.insert(2); adj.insert(4);
+	adj.insert(0); adj.insert(4);
 	g.graph[1] = adj;
 	adj.clear();
 
-	adj.insert(1); adj.insert(5); 
+	adj.insert(0); adj.insert(4);
+	g.graph[2] = adj;
+	adj.clear();
+
+	adj.insert(4); adj.insert(0);
+	g.graph[3] = adj;
+	adj.clear();
+
+	adj.insert(2); adj.insert(1); adj.insert(3);
+	g.graph[4] = adj;
+	adj.clear();
+	*/
+	
+	adj.insert(1); adj.insert(6); adj.insert(5); adj.insert(4);
+	g.graph[0] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(2); adj.insert(4); adj.insert(3);
+	g.graph[1] = adj;
+	adj.clear();
+
+	adj.insert(1); adj.insert(5); adj.insert(3);
 	g.graph[2] = adj;
 	adj.clear();
 
@@ -187,18 +209,70 @@ void store_graph(Graph &g){
 	adj.insert(0);
 	g.graph[6] = adj;
 	adj.clear();
+	
 }
 
 Path generate_path(Graph g, vertex_t u, vertex_t v){
 	// Generate a random path between vertex u,v
 
  	// TODO: Fix details about don't findind and edge
+	
+	vertex_t vertex = g.random_vertice();
+	std :: queue<std :: pair<vertex_t, int>> q;
+	std :: vector<int> path_lens(g.number_vertices(),99999999);
+	int min_len;
+
+	path_lens[u]=0;
+	q.push(std :: pair<vertex_t, int>(u, 0));
+	min_len = g.number_vertices();
+
+	while(q.size()){
+		std :: pair<vertex_t, int> front = q.front();
+		q.pop();
+		if(front.second > min_len) break;
+		if(front.first == v){
+			min_len = std :: min(min_len, front.second);
+			break;
+		}
+		for(int node: g.get_adj(front.first)){
+			if(path_lens[node] > front.second + 1){
+				path_lens[node] = front.second + 1;
+				q.push(std :: pair<vertex_t, int>(node, path_lens[node]));
+			}
+		}
+	}
+
+	Path c;
+	std::random_device rd;
+	std::mt19937 generator(rd());
+
+	c.initialize(path_lens[v]+1);
+	//c.path_size = path_lens[v];
+
+	vertex_t act_node = v;
+	c.insert(v);
+	for(int i=path_lens[v]; i > 0; i--){
+		std :: vector<vertex_t> possible_nodes;
+		for(int node: g.get_adj(act_node)){
+			if(path_lens[node] == i-1)
+				possible_nodes.push_back(node);
+		}
+		std :: uniform_int_distribution<int> uniform_int_path(0, possible_nodes.size()-1);
+		act_node = possible_nodes[uniform_int_path(generator)];
+		c.insert(act_node);
+	}
+	std :: reverse(c.path.begin(),c.path.end());
+
+	//std ::cout << c << std :: endl;
+	return(c);
+	/*
 	Path c;
 	vertex_t vertex;
 	std :: unordered_set<vertex_t> adj;
 	
 	c.initialize(g.d);
 	c.insert(u);
+
 	vertex = g.random_vertice();
 
 	while(vertex!=v){
@@ -209,7 +283,9 @@ Path generate_path(Graph g, vertex_t u, vertex_t v){
 		vertex = g.random_vertice();
 	}
 	c.insert(vertex);
+
 	return(c);
+	*/
 }
 
 Routing generate_routing(Graph g){
@@ -218,13 +294,14 @@ Routing generate_routing(Graph g){
 	Path c;
 
 	vertex_t u=0;
-	r.initialize(g.d);
-
-	for(vertex_t v=0; v<g.d*g.d; v++){
-		if(u!=v%g.d){
-			c = generate_path(g,u,v%g.d);
+	int n = g.number_vertices();
+	r.initialize(n);
+	for(vertex_t v=0; v<n*n; v++){
+		if(u!=v%n){
+			//std :: cout << u << " --> " << v%n << std :: endl;
+			c = generate_path(g,u,v%n);
 			r.insert(c);
-			if((v+1)%g.d==0) u++;
+			if((v+1)%n==0) u++;
 		}
 	}
 	return(r);
@@ -360,12 +437,10 @@ Routing eta(Population p){
 
 Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	Population p, new_p, parents;
-	Routing r;
 
 	p.initialize(mu);
 	parents.initialize(2);
 	new_p.initialize(mu-2);
-	r.initialize(g.d);
 
 	p = xi(g,mu); // Generate initial population
 	std :: cout << p << std :: endl;
