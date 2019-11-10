@@ -46,7 +46,7 @@ struct Graph{
 	}
 
 	vertex_t random_vertice(){
-		// Generate a random vertice fromt adj set
+		// Generate a random vertice from adj set
 		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
   		std :: default_random_engine generator(seed);
   		std :: uniform_int_distribution<vertex_t> distribution(0,d-1);
@@ -190,7 +190,9 @@ void store_graph(Graph &g){
 	std :: unordered_set<vertex_t> adj; // Adjacent list
 	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
-	/*
+
+	g.d = 5;
+
 	adj.insert(1); adj.insert(3); adj.insert(2);
 	g.graph[0] = adj;
 	adj.clear();
@@ -210,8 +212,8 @@ void store_graph(Graph &g){
 	adj.insert(2); adj.insert(1); adj.insert(3);
 	g.graph[4] = adj;
 	adj.clear();
-	*/
 	
+	/*
 	adj.insert(1); adj.insert(6); adj.insert(5); adj.insert(4);
 	g.graph[0] = adj;
 	adj.clear();
@@ -239,7 +241,7 @@ void store_graph(Graph &g){
 	adj.insert(0);
 	g.graph[6] = adj;
 	adj.clear();
-	
+	*/
 }
 
 Path generate_path(Graph g, vertex_t u, vertex_t v){
@@ -502,8 +504,6 @@ int main(){
 	int mu=50; // Number of population
 	float alpha=0.02; // Probability of mutation
 	int d=7; // |V|
-
-	g.d = d;
 
 	store_graph(g); // Create a graph
 
