@@ -93,6 +93,17 @@ struct Path{
 		return(path_size);
 	}
 
+	int check_edge(vertex_t u, vertex_t v){
+		int congestion=0;
+
+		for(int i=0;i<path_size-1;i++){
+			if( (path[i]==u && path[i+1]==v) || (path[i]==v && path[i+1]==u))
+				congestion++;
+		}
+		//std :: cout << u << " -- " << v << " --> " << congestion << std :: endl;
+		return(congestion);
+	}
+
 	friend std :: ostream& operator<<(std :: ostream& os,const Path& c){
 		for(auto iterator: c.path){
 			os << iterator << " ";
@@ -121,6 +132,25 @@ struct Routing{
 			i++;
 		}
 		return(os);
+	}
+
+	std :: vector<int> get_lambda(int n){
+		int congestion=0;
+		std :: vector<int> lambda;
+		vertex_t u=0;
+
+		for(vertex_t v=0; v<n*n; v++){
+			if(u!=v%n){
+				for(int r=0; r<size; r++){
+					congestion += routing[r].check_edge(u,v%n);
+				}
+				if(congestion) lambda.push_back(congestion);
+				congestion = 0;
+				if((v+1)%n==0) u++;
+			}
+		}
+
+		return(lambda);
 	}
 };
 
@@ -321,36 +351,48 @@ Population xi(Graph g, int mu){
 	return(p);
 }
 
-double omega(Routing r){
+int omega(Routing r, int n){
 	// Cost function
 	// Calculate norm of R = ||R||
 	// ||R|| = for all c_i in R sqrt(sum_i^n |c_i|)
-	double cost=0.0;
+	//double cost=0.0;
+	std :: vector<int> lambda; // Store \pi(\Gamma,e)
 
-	for(auto iterator: r.routing){
-		cost += std :: pow(iterator.size(),2);
+	lambda = r.get_lambda(n);
+	/*
+	for(auto it: lambda){
+		std :: cout << it << " - ";
+	}
+	std :: cout << std :: endl;*/
+	return(*(std :: max_element(lambda.begin(),lambda.end())));
+	/*
+	for(auto iterator: lambda){
+		//std :: cout << iterator << " - ";
+		cost += std :: pow(iterator,2);
 		//std :: cout << iterator.size() << std :: endl;
 	}
+	//std :: cout << std :: endl;
 	//std :: cout << sqrt(cost) << std :: endl;
-	return(sqrt(cost));
+	*/
+	//return(sqrt(cost));
 }
 
-Population psi(Population p){
+Population psi(Population p, int n){
 	// Select the best parents based on his value
 	Population parents;
 	Routing r1=p.population[0], r2=p.population[1];
-	double r1_value=omega(r1), r2_value=omega(r2);
-	double aux;
+	int r1_value=omega(r1,n), r2_value=omega(r2,n);
+	int aux;
 	parents.initialize(2);
 
 	for(int i=2; i<p.mu; i++){
-		aux = omega(p.population[i]);
-		if(aux < r1_value){
+		aux = omega(p.population[i],n);
+		if(aux <= r1_value){
 			r1 = p.population[i];
 			r1_value = aux;
 		}
 		else{
-			if(aux < r2_value){
+			if(aux <= r2_value){
 				r2 = p.population[i];
 				r2_value = aux;
 			}
@@ -419,23 +461,23 @@ Population theta(Population new_p, Population parents){
 	return(p);
 }
 
-Routing eta(Population p){
+std :: pair<Routing,int> eta(Population p, int n){
 	// Select the best routing : omega(r) is minimum
 	Routing r1=p.population[0];
-	double r1_value=omega(r1);
-	double aux;
-
+	int r1_value=omega(r1,n);
+	int aux;
+	// TODO --> Check cost between routings
 	for(int i=1; i<p.mu; i++){
-		aux = omega(p.population[i]);
+		aux = omega(p.population[i],n);
 		if(aux < r1_value){
 			r1 = p.population[i];
 			r1_value = aux;
 		}
 	}
-	return(r1);
+	return(std :: pair<Routing, int>(r1,r1_value));
 }
 
-Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
+std :: pair<Routing,int> genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	Population p, new_p, parents;
 
 	p.initialize(mu);
@@ -445,17 +487,17 @@ Routing genetic_algorithm(Graph g, int beta, int mu, float alpha){
 	p = xi(g,mu); // Generate initial population
 	std :: cout << p << std :: endl;
 	for(int generation=0; generation<beta; generation++){
-		parents = psi(p); // Select parents
+		parents = psi(p, g.number_vertices()); // Select parents
 		new_p = phi(parents, g, mu-2); // Generate new population with parents
 		new_p = upsilon(new_p, g, alpha); // Apply mutation to new population if prob < alpha
 		p = theta(new_p, parents); // Combine new population with parents to obtain current population
 	}
-	return(eta(p)); // Return the best routing : omega(r) is minimum
+	return(eta(p,g.number_vertices())); // Return the best routing : omega(r) is minimum
 }
 
 int main(){
 	Graph g; // Graph
-	Routing r; // Best routing
+	//Routing r; // Best routing
 	int beta=30; // Number of generations
 	int mu=50; // Number of population
 	float alpha=0.02; // Probability of mutation
@@ -466,10 +508,11 @@ int main(){
 	store_graph(g); // Create a graph
 
 	std :: cout << g << std :: endl;
+	std :: pair<Routing, int> r;
 
 	r = genetic_algorithm(g,beta, mu, alpha);
 
-	std :: cout << "Best routing after " << beta << " generatios: " << std :: endl <<  r << std :: endl;
+	std :: cout << "Best routing after " << beta << " generations with " << r.second << " index: " << std :: endl <<  r.first << std :: endl;
 	
 	return(42);
 }
