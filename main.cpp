@@ -389,7 +389,7 @@ Population psi(Population p, int n){
 
 	for(int i=2; i<p.mu; i++){
 		aux = omega(p.population[i],n);
-		if(aux <= r1_value){
+		if(aux < r1_value){
 			r1 = p.population[i];
 			r1_value = aux;
 		}
