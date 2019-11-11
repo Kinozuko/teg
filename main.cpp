@@ -29,8 +29,13 @@ struct Graph{
 	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> graph;
 	int d; // d = |V|
 
+	void insert_edge(vertex_t u, vertex_t v){
+		graph[u].insert(v);
+		graph[v].insert(u);
+	}
+
 	int number_vertices(){
-		return(d);
+		return(graph.size());
 	}
 
 	std :: unordered_set<vertex_t> get_adj(vertex_t u){
@@ -186,63 +191,6 @@ float random_probability(){
 	return(generator(engine)); 
 }
 
-void store_graph(Graph &g){
-	std :: unordered_set<vertex_t> adj; // Adjacent list
-	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
-	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
-
-	g.d = 5;
-
-	adj.insert(1); adj.insert(3); adj.insert(2);
-	g.graph[0] = adj;
-	adj.clear();
-
-	adj.insert(0); adj.insert(4);
-	g.graph[1] = adj;
-	adj.clear();
-
-	adj.insert(0); adj.insert(4);
-	g.graph[2] = adj;
-	adj.clear();
-
-	adj.insert(4); adj.insert(0);
-	g.graph[3] = adj;
-	adj.clear();
-
-	adj.insert(2); adj.insert(1); adj.insert(3);
-	g.graph[4] = adj;
-	adj.clear();
-	
-	/*
-	adj.insert(1); adj.insert(6); adj.insert(5); adj.insert(4);
-	g.graph[0] = adj;
-	adj.clear();
-
-	adj.insert(0); adj.insert(2); adj.insert(4); adj.insert(3);
-	g.graph[1] = adj;
-	adj.clear();
-
-	adj.insert(1); adj.insert(5); adj.insert(3);
-	g.graph[2] = adj;
-	adj.clear();
-
-	adj.insert(4); adj.insert(1); adj.insert(2);
-	g.graph[3] = adj;
-	adj.clear();
-
-	adj.insert(0); adj.insert(1); adj.insert(3);
-	g.graph[4] = adj;
-	adj.clear();
-
-	adj.insert(2); adj.insert(0);
-	g.graph[5] = adj;
-	adj.clear();
-
-	adj.insert(0);
-	g.graph[6] = adj;
-	adj.clear();
-	*/
-}
 
 Path generate_path(Graph g, vertex_t u, vertex_t v){
 	// Generate a random path between vertex u,v
@@ -412,8 +360,9 @@ Routing cross(Population parents, Graph g){
 	// Crossing parents to obtain a child
 	// Each path has a 0.5 chance to be selected
 	Routing r;
+	int d = g.number_vertices();
 
-	r.initialize(g.d);
+	r.initialize(d);
 	for(int i=0;i<r.size;i++){
 		if(random_probability()<0.5){
 			r.insert(parents.population[0].routing[i]);
@@ -443,7 +392,7 @@ Population upsilon(Population new_p, Graph g, float alpha){
 	//std :: cout << new_p.mu << std :: endl;
 	for(int i=0;i<new_p.mu;i++){
 		for(int j=0;j<new_p.population[i].routing.size();j++){
-			if(random_probability() <= alpha){
+			if(random_probability() < alpha){
 				new_p.population[i].routing[j] = generate_path(g,
 					new_p.population[i].routing[j].path.front(),
 					new_p.population[i].routing[j].path.back());
@@ -487,7 +436,7 @@ std :: pair<Routing,int> genetic_algorithm(Graph g, int beta, int mu, float alph
 	new_p.initialize(mu-2);
 
 	p = xi(g,mu); // Generate initial population
-	std :: cout << p << std :: endl;
+	//std :: cout << p << std :: endl;
 	for(int generation=0; generation<beta; generation++){
 		parents = psi(p, g.number_vertices()); // Select parents
 		new_p = phi(parents, g, mu-2); // Generate new population with parents
@@ -497,22 +446,75 @@ std :: pair<Routing,int> genetic_algorithm(Graph g, int beta, int mu, float alph
 	return(eta(p,g.number_vertices())); // Return the best routing : omega(r) is minimum
 }
 
+void store_graph(Graph &g){
+	vertex_t u,v;
+
+	while(std :: cin >> u >> v){
+		g.insert_edge(u,v);
+	}
+}
+
+using namespace std::chrono; 
+
 int main(){
 	Graph g; // Graph
 	//Routing r; // Best routing
 	int beta=30; // Number of generations
-	int mu=50; // Number of population
+	int mu=30; // Number of population
 	float alpha=0.02; // Probability of mutation
-	int d=7; // |V|
 
 	store_graph(g); // Create a graph
 
 	std :: cout << g << std :: endl;
+	
+	
 	std :: pair<Routing, int> r;
 
+	auto start = high_resolution_clock::now(); 
 	r = genetic_algorithm(g,beta, mu, alpha);
+	auto stop = high_resolution_clock::now(); 
+	
+	auto duration = duration_cast<microseconds>(stop - start); 
 
-	std :: cout << "Best routing after " << beta << " generations with " << r.second << " index: " << std :: endl <<  r.first << std :: endl;
+	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
+
+	std :: cout << g.number_vertices() << "\t";
+	std :: cout << r.second << "\t";
+	std :: cout << duration.count() << std :: endl;
+
+	//std :: cout << "Best routing after " << beta << " generations with " << r.second << " index: " << std :: endl <<  r.first << std :: endl;
+	
+	//std :: cout << duration.count() << std :: endl;
 	
 	return(42);
+	/* Store Graph
+
+	std :: unordered_set<vertex_t> adj; // Adjacent list
+	std :: unordered_set<vertex_t> :: iterator itr_adj; // Iterator of adjacent list
+	std :: unordered_map<vertex_t, std :: unordered_set<vertex_t>> :: iterator itr_vertex; // Iterator of vertex
+
+	
+	
+	g.d = 5;
+
+	adj.insert(1); adj.insert(3); adj.insert(2);
+	g.graph[0] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(4);
+	g.graph[1] = adj;
+	adj.clear();
+
+	adj.insert(0); adj.insert(4);
+	g.graph[2] = adj;
+	adj.clear();
+
+	adj.insert(4); adj.insert(0);
+	g.graph[3] = adj;
+	adj.clear();
+
+	adj.insert(2); adj.insert(1); adj.insert(3);
+	g.graph[4] = adj;
+	adj.clear();
+	*/
 }
