@@ -470,6 +470,20 @@ int main(){
 	
 	std :: pair<Routing, int> r;
 
+	for(int i=0;i<3;i++){	
+		auto start = high_resolution_clock::now(); 
+
+		r = genetic_algorithm(g,beta, mu, alpha);
+
+		auto stop = high_resolution_clock::now();
+
+		auto duration = duration_cast<microseconds>(stop - start); 
+
+		std :: cout << r.second << "\t";
+		std :: cout << duration.count() << "\t";
+	}
+	
+	/*
 	beta = 50;
 	mu = 15;
 	alpha = 0.01;
@@ -523,20 +537,9 @@ int main(){
 
 	std :: cout << r.second << "\t";
 	std :: cout << duration.count() << "\t";
-
+	*/
 	/*
-	for(int i=0;i<3;i++){	
-		auto start = high_resolution_clock::now(); 
-
-		r = genetic_algorithm(g,beta, mu, alpha);
-
-		auto stop = high_resolution_clock::now();
-
-		auto duration = duration_cast<microseconds>(stop - start); 
-
-		std :: cout << r.second << "\t";
-		std :: cout << duration.count() << "\t";
-	}
+	
 	*/
 	return(42);
 
