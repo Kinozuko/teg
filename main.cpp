@@ -501,7 +501,7 @@ int main(){
 	r = genetic_algorithm(g,beta, mu, alpha);
 
 	auto stop1 = high_resolution_clock::now();
-	auto duration1 = duration_cast<microseconds>(stop - start); 
+	auto duration1 = duration_cast<microseconds>(stop1 - start1); 
 
 	std :: cout << r.second << "\t";
 	std :: cout << duration1.count() << "\t";
@@ -519,7 +519,7 @@ int main(){
 	r = genetic_algorithm(g,beta, mu, alpha);
 
 	auto stop2 = high_resolution_clock::now();
-	auto duration2 = duration_cast<microseconds>(stop - start); 
+	auto duration2 = duration_cast<microseconds>(stop2 - start2); 
 
 	std :: cout << r.second << "\t";
 	std :: cout << duration.count() << "\t";
