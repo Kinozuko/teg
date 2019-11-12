@@ -470,11 +470,62 @@ int main(){
 	
 	std :: pair<Routing, int> r;
 
+	beta = 50;
+	mu = 15;
+	alpha = 0.01;
+
 	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
 
 	std :: cout << g.number_vertices() << "\t";
 
-	for(int i=0;i<3;i++){
+	auto start = high_resolution_clock::now(); 
+
+	r = genetic_algorithm(g,beta, mu, alpha);
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start); 
+
+	std :: cout << r.second << "\t";
+	std :: cout << duration.count() << "\t";
+
+	beta = 30;
+	mu = 20;
+	alpha = 0.005;
+
+	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
+
+	std :: cout << g.number_vertices() << "\t";
+
+	auto start = high_resolution_clock::now(); 
+
+	r = genetic_algorithm(g,beta, mu, alpha);
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start); 
+
+	std :: cout << r.second << "\t";
+	std :: cout << duration.count() << "\t";
+
+	beta = 20;
+	mu = 60;
+	alpha = 0.01;
+
+	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
+
+	std :: cout << g.number_vertices() << "\t";
+
+	auto start = high_resolution_clock::now(); 
+
+	r = genetic_algorithm(g,beta, mu, alpha);
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start); 
+
+	std :: cout << r.second << "\t";
+	std :: cout << duration.count() << "\t";
+
+	/*
+	for(int i=0;i<3;i++){	
 		auto start = high_resolution_clock::now(); 
 
 		r = genetic_algorithm(g,beta, mu, alpha);
@@ -486,7 +537,7 @@ int main(){
 		std :: cout << r.second << "\t";
 		std :: cout << duration.count() << "\t";
 	}
-
+	*/
 	return(42);
 
 
