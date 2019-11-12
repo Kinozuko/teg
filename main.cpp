@@ -465,28 +465,36 @@ int main(){
 
 	store_graph(g); // Create a graph
 
-	std :: cout << g << std :: endl;
+	//std :: cout << g << std :: endl;
 	
 	
 	std :: pair<Routing, int> r;
 
-	auto start = high_resolution_clock::now(); 
-	r = genetic_algorithm(g,beta, mu, alpha);
-	auto stop = high_resolution_clock::now(); 
-	
-	auto duration = duration_cast<microseconds>(stop - start); 
-
 	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
 
 	std :: cout << g.number_vertices() << "\t";
-	std :: cout << r.second << "\t";
-	std :: cout << duration.count() << std :: endl;
+
+	for(int i=0;i<3;i++){
+		auto start = high_resolution_clock::now(); 
+
+		r = genetic_algorithm(g,beta, mu, alpha);
+
+		auto stop = high_resolution_clock::now();
+
+		auto duration = duration_cast<microseconds>(stop - start); 
+
+		std :: cout << r.second << "\t";
+		std :: cout << duration.count() << "\t";
+	}
+
+	return(42);
+
 
 	//std :: cout << "Best routing after " << beta << " generations with " << r.second << " index: " << std :: endl <<  r.first << std :: endl;
 	
 	//std :: cout << duration.count() << std :: endl;
 	
-	return(42);
+	
 	/* Store Graph
 
 	std :: unordered_set<vertex_t> adj; // Adjacent list
