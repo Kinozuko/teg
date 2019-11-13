@@ -1,0 +1,21 @@
+\beta,\mu,\alpha,Grafo,Vertices,Indice,Tiempo,Observaciones
+30,30,0.02,Ciclo,50,627,626569530,Original
+50,15,0.01,Ciclo,50,627,498620984,Mejora en tiempo
+30,20,0.005,Ciclo,50,626,406535065,Mejora en tiempo, desmejora en indice (-1)
+20,60,0.015,Ciclo,50,626,838583084,Desmejora en tiempo e indice (-1)
+30,30,0.02,Brujin,64,23,496439266,Original
+50,15,0.01,Brujin,64,23,378246821,Mejora en tiempo
+30,20,0.005,Brujin,64,23,316361561,Mejora en tiempo
+20,60,0.015,Brujin,64,22,699191170,Desmejora en tiempo e indice (-1)
+30,30,0.02,Rueda,60,113,355744677,Original
+50,15,0.01,Rueda,60,113,272448845,Mejora en tiempo
+30,20,0.005,Rueda,60,113,225231503,Mejora en tiempo
+20,60,0.015,Rueda,60,113,482359150,Desmejora en tiempo
+30,30,0.02,Estrella,60,120,363702496,Original
+50,15,0.01,Estrella,60,120,282919959,Mejora en tiempo
+30,20,0.005,Estrella,60,120,233176385,Mejora en tiempo
+20,60,0.015,Estrella,60,120,495133941,Desmejora en tiempo
+30,30,0.02,Hipercubo,64,74,647703959,Original
+50,15,0.01,Hipercubo,64,74,510091022,Mejora en tiempo
+30,20,0.005,Hipercubo,64,73,419148872,Mejora en tiempo, desmejora en indice (-1)
+20,60,0.015,Hipercubo,64,72,885127830,Desmejora en tiempo e indice (-2)
