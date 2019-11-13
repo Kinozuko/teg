@@ -472,8 +472,6 @@ int main(){
 
 	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
 
-	
-
 	for(int i=0;i<3;i++){	
 		std :: cout << g.number_vertices() << "\t";
 		
@@ -528,7 +526,7 @@ int main(){
 
 	beta = 20;
 	mu = 60;
-	alpha = 0.01;
+	alpha = 0.015;
 
 	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
 
@@ -542,7 +540,7 @@ int main(){
 	auto duration2 = duration_cast<microseconds>(stop2 - start2); 
 
 	std :: cout << r.second << "\t";
-	std :: cout << duration.count() << "\t";
+	std :: cout << duration2.count() << "\t";
 	*/
 	/*
 	
