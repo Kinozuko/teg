@@ -470,7 +470,13 @@ int main(){
 	
 	std :: pair<Routing, int> r;
 
+	std :: cout << "Vertices\tIndex\tTime(microseconds)" << std :: endl;
+
+	
+
 	for(int i=0;i<3;i++){	
+		std :: cout << g.number_vertices() << "\t";
+		
 		auto start = high_resolution_clock::now(); 
 
 		r = genetic_algorithm(g,beta, mu, alpha);
